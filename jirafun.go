@@ -101,7 +101,7 @@ func (c *Commit) PopulateStatus() {
 	} else {
 		c.status = "CLEAN"
 	}
-	err = gitCommand(fileName, false, "git", "reset", "HEAD~")
+	err = gitCommand(fileName, false, "git", "reset", "--hard", "HEAD~")
 	if err != nil {
 		fmt.Print(err)
 		os.Exit(1)

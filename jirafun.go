@@ -304,7 +304,6 @@ func (il *IgnoreList) ReadIgnoreFile(fileName string,
 			il.ignores[strings.TrimSpace(*key)] = true
 		}
 	}
-	fmt.Fprintf(os.Stderr, "Ignoring %d jiras\n", len(il.ignores));
 	return nil
 }
 
@@ -331,7 +330,7 @@ var branchName *string = flag.String("b", "", "the branch to look for " +
 	"commits in")
 var regexStr *string = flag.String("r", "(HDFS-[0123456789]*)[^0123456789]",
 	"the regular expression to use to determine which commits to examine")
-var ignoreFile *string = flag.String("i", "",
+var ignoreFiles *string = flag.String("i", "",
 	"a file containing a newline-separated list of JIRAs to ignore.  If you " +
 	"are using a regex with a backrefernece, each line should contain the " +
 	"contents")
@@ -359,12 +358,16 @@ func main() {
 		os.Exit(1)
 	}
 	il := newIgnoreList()
-	if (*ignoreFile != "") {
-		err = il.ReadIgnoreFile(*ignoreFile, regex)
-		if (err != nil) {
-			fmt.Printf("error reading ignore file: %s\n", err)
-			os.Exit(1)
+	if (*ignoreFiles != "") {
+		for _, ignoreFile := range strings.Split(*ignoreFiles, ",") {
+			fmt.Fprintf(os.Stderr, "Loading ignore file %s\n", ignoreFile);
+			err = il.ReadIgnoreFile(ignoreFile, regex)
+			if (err != nil) {
+				fmt.Printf("error reading ignore file: %s\n", err)
+				os.Exit(1)
+			}
 		}
+		fmt.Fprintf(os.Stderr, "Ignoring %d jiras in total\n", len(il.ignores));
 	}
 	fileNames := []string {
 		fmt.Sprintf("/tmp/jirafun.1.%d", os.Getpid()),
